@@ -4,20 +4,32 @@ jobs:
   Dependances:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
       - name: Dependances
         run: |
-          echo "ecrire ici le scrypt de contrôle des dépendances"
+          docker run --rm \
+            -v "$PWD":/project \
+            aquasec/trivy:latest fs \
+            --exit-code 1 \
+            --severity HIGH,CRITICAL \
+            --file-patterns "pip:.*\.txt" \
+            /project
   Dockerfile:
     runs-on: ubuntu-latest
     needs: Dependances
     steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
       - name: Test Dockerfile
         run: |
-          echo "ecrire ici le scrypt de contrôle du Dockerfile"
+          docker run --rm -i hadolint/hadolint < Dockerfile
   Deploy:
     runs-on: ubuntu-latest
     needs: Dockerfile
     steps:
       - name: Deploy
         run: |
-          echo "Rien à faire ici. Votre application est prête à être déployée"  
+          echo "Rien à faire ici. Votre application est prête à être déployée"
